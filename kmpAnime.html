@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>kmp算法动画</title>
+    <script src="lib/spritejs_2.4.3.min.js"></script>
+    <script src="lib/jquery-1.12.4.js"></script>
+    <script src="js/kmpcal.js"></script>
+</head>
+<body>
+<h1>HOW'S KMP WORKING</h1>
+<label>TEXT:
+    <input name="text" value="ababaaaabdkababfl">
+    <!--<input name="text" value="accabbarrabab">-->
+</label>
+<label>PATTERN:
+    <input name="pattern" value="ababf">
+</label>
+<button class="redraw" type="button">START MATCHING</button>
+<div id="screen" style="width: 100%;height: 400px;">
+
+</div>
+
+</body>
+<script>
+    const {Scene, Sprite, Label, Group} = spritejs;
+    const scene = new Scene('#screen', {viewport: ['auto', 'auto'], resolution: [1800, 600]});
+    //adjust speed here
+    const frameDuration = 0.4;
+
+    var layer = scene.layer('screen');
+    var tSnake;//group
+    var pSnake;//group
+    //设置每格的基本样式
+    var cellStyle = {
+        fillColor: '#000',
+        font: 'oblique bold 28px Arial',
+        textAlign: 'center',
+        lineHeight: '50',
+        border: [1, '#ccc'],
+        size:[50, 50]
+    };
+
+    function draw(){
+        let ts = $('[name=text]').val();
+        let ps = $('[name=pattern]').val();
+        tSnake = genCellGroup(ts, 50, 50);
+        pSnake = genCellGroup(ps, 110, 50);
+        layer.append(tSnake, pSnake);
+        runAni(ts, ps);
+    }
+
+    async function runAni(ts, ps){
+        var g = KmpCal.kmpAlg(ts, ps);
+        var currI = 0;
+        var currJ = 0;
+        async function next(){
+            var result = g.next();
+            if (result.done) return;
+            let index = result.value;//[i, j]
+            console.log(currI, currJ, index);
+            await kmpAni(currI, currJ, index);
+            currI = index[0];
+            currJ = index[1];
+            next();
+        }
+        next();
+    }
+
+    //[i, j]由[currI, currJ]转变为[nI, nJ]，
+    //根据generator返回的指针位置判断比较结果，决定移动动画和变色动画
+    async function kmpAni(currI, currJ, genVal){
+        let nI = genVal[0];
+        let nJ = genVal[1];
+
+        //若子串指针回溯或不变，说明上一个比较是不相同的，反之。
+        if(nJ > currJ) {
+            await Promise.all([
+                turnGreen(tSnake.children[currI]),
+                turnGreen(pSnake.children[currJ])
+            ]);
+        } else {
+            for (let i = 0; i <= currJ - nJ; i++) {
+                let ind = currJ - i;
+                if(ind < 0){
+                    break;
+                }
+                turnWhite(pSnake.children[ind]);
+            }
+            for (let i = 0; i < pSnake.children.length; i++) {
+                let ind = nI - nJ - i - 1;
+                if(ind < 0){
+                    break;
+                }
+                turnWhite(tSnake.children[ind]);
+            }
+            await Promise.all([
+                turnRed(tSnake.children[currI]),
+                turnRed(pSnake.children[currJ])
+            ]);
+
+            //p串指针没有回退到头部时，虽然当前t串p串比较的字符不同，
+            //但当前t串字符是与p串回退到的指针位置之前的字符相同的，所以变红之后不是变白而是变绿
+            await Promise.all([
+                (()=>{
+                    if(nJ > 0){
+                        return turnGreen(tSnake.children[currI]);
+                    }else{
+                        return turnWhite(tSnake.children[currI]);
+                    }
+                })(),
+                turnWhite(pSnake.children[currJ])
+            ]);
+        }
+        await pSnake.transition(frameDuration).attr({x: x => x+ (nI - nJ - currI + currJ) * cellStyle.size[0]});
+
+        async function turnGreen(sprite){
+            await sprite.transition(frameDuration).attr({bgcolor: '#0f0', fillColor:'#fff'});
+        }
+        async function turnRed(sprite){
+            await sprite.transition(frameDuration).attr({bgcolor: '#f00', fillColor:'#fff'});
+        }
+        async function turnWhite(sprite){
+            await sprite.transition(frameDuration).attr({bgcolor: '#fff', fillColor:'#000'});
+        }
+    }
+
+    function genCellGroup(str, y, size){
+        let group = new Group();
+        group.attr({
+            size: [size * str.length, size].map(v=>{
+                return v + 2 * cellStyle.border[0];
+            }),
+            pos: [10, y]
+        });
+
+        str.split('').forEach((v, i)=>{
+            let part = new Label(v);
+            part.attr(Object.assign({
+                pos: [i*size, 0]
+            }, cellStyle));
+            group.append(part);
+        });
+        return group;
+    }
+
+    $(document).ready(()=>{
+        $('.redraw').click(()=>{
+            scene.removeLayer(layer);
+            layer = scene.layer('screen');
+            draw();
+        });
+        draw();
+    });
+</script>
+</html>
