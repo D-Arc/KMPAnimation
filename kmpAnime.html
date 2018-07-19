@@ -23,16 +23,16 @@
 
 </body>
 <script>
-    const {Scene, Sprite, Label, Group} = spritejs;
+    const {Scene, Label, Group} = spritejs;
     const scene = new Scene('#screen', {viewport: ['auto', 'auto'], resolution: [1800, 600]});
     //adjust speed here
-    const frameDuration = 0.4;
+    const frameDuration = 0.3;
 
-    var layer = scene.layer('screen');
-    var tSnake;//group
-    var pSnake;//group
+    let layer = scene.layer('screen');
+    let tSnake;//group
+    let pSnake;//group
     //设置每格的基本样式
-    var cellStyle = {
+    const cellStyle = {
         fillColor: '#000',
         font: 'oblique bold 28px Arial',
         textAlign: 'center',
@@ -51,11 +51,11 @@
     }
 
     async function runAni(ts, ps){
-        var g = KmpCal.kmpAlg(ts, ps);
-        var currI = 0;
-        var currJ = 0;
+        let g = KmpCal.kmpAlg(ts, ps);
+        let currI = 0;
+        let currJ = 0;
         async function next(){
-            var result = g.next();
+            let result = g.next();
             if (result.done) return;
             let index = result.value;//[i, j]
             console.log(currI, currJ, index);
