@@ -80,19 +80,18 @@
                 turnGreen(pSnake.children[currJ])
             ]);
         } else {
-            for (let i = 0; i <= currJ - nJ; i++) {
-                let ind = currJ - i;
-                if(ind < 0){
-                    break;
+            //pattern串从回溯到的位置后变回白色
+            //text串从指针位置再往前回溯"pattern串要回溯到的位置的index"个长度之前都要变回白色
+            //循环次数：p串指针回溯n个位置+1
+            for (let i = 0; i < currJ - nJ + 1; i++) {
+                let pIndex = currJ - i;
+                let tIndex = nI - nJ - i - 1;
+                if(pIndex > -1){
+                    turnWhite(pSnake.children[pIndex]);
                 }
-                turnWhite(pSnake.children[ind]);
-            }
-            for (let i = 0; i < pSnake.children.length; i++) {
-                let ind = nI - nJ - i - 1;
-                if(ind < 0){
-                    break;
+                if(tIndex > -1){
+                    turnWhite(tSnake.children[tIndex]);
                 }
-                turnWhite(tSnake.children[ind]);
             }
             await Promise.all([
                 turnRed(tSnake.children[currI]),

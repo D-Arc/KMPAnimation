@@ -8,7 +8,7 @@ class KmpCal {
         let j = 0; // 模式串的位置
         let next = this.getNext(ps);
         while (i < t.length && j < p.length) {
-            if (j == -1 || t[i] == p[j]) { // 当j为-1时，要移动的是i，当然j也要归0
+            if (j === -1 || t[i] === p[j]) { // 当j为-1时，要移动的是i，当然j也要归0
                 i++;
                 j++;
                 //生成指针位置的index数组
@@ -20,7 +20,7 @@ class KmpCal {
             }
         }
 
-        if (j == p.length) {
+        if (j === p.length) {
             return i - j;
         } else {
             return -1;
@@ -35,8 +35,8 @@ class KmpCal {
         let k = -1;//j(子串指针)需要回溯到的位置，-1就是移动i(父串)
 
         while (j < p.length - 1) {
-            if (k == -1 || p[j] == p[k]) {
-                if (p[++j] == p[++k]) { // 当两个字符相等时要跳过
+            if (k === -1 || p[j] === p[k]) {
+                if (p[++j] === p[++k]) { // 当两个字符相等时要跳过
                     next[j] = next[k];
                 } else {
                     next[j] = k;
