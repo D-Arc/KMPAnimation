@@ -17,18 +17,18 @@
     <input name="pattern" value="ababf">
 </label>
 <button class="redraw" type="button">START MATCHING</button>
-<div id="screen" style="width: 100%;height: 400px;">
+<div id="draw-screen" style="width: 1200px;height: 400px;">
 
 </div>
 
 </body>
 <script>
     const {Scene, Label, Group} = spritejs;
-    const scene = new Scene('#screen', {viewport: ['auto', 'auto'], resolution: [1800, 600]});
+    const scene = new Scene('#draw-screen', {viewport: ['auto', 'auto'], resolution: [1800, 600]});
     //adjust speed here
     const frameDuration = 0.3;
 
-    let layer = scene.layer('screen');
+    let layer = scene.layer('draw-screen');
     let tSnake;//group
     let pSnake;//group
     //设置每格的基本样式
@@ -146,7 +146,7 @@
     $(document).ready(()=>{
         $('.redraw').click(()=>{
             scene.removeLayer(layer);
-            layer = scene.layer('screen');
+            layer = scene.layer('draw-screen');
             draw();
         });
         draw();
